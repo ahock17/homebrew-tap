@@ -1,0 +1,25 @@
+name: Bump casks
+
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  plezy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: .github/bump-plezy.sh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Commit new version
+        run: |
+          git diff --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "plezy $(sed -n 's/^  version "\(.*\)"$/\1/p' Casks/plezy.rb)"
+          git push
